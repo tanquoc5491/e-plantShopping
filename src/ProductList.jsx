@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
+import { useSelector, useDispatch } from 'react-redux';
+import { addItem } from './CartSlice';
+
 function ProductList({ onHomeClick }) {
+    const dispatch = useDispatch();
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+    const [addedToCart, setAddedToCart] = useState({});
+    const cartItems = useSelector(state => state.cart.items);
+    const cartState = useSelector(state => state.cart.cardState);
 
     const plantsArray = [
         {
@@ -13,37 +20,37 @@ function ProductList({ onHomeClick }) {
                     name: "Snake Plant",
                     image: "https://cdn.pixabay.com/photo/2021/01/22/06/04/snake-plant-5939187_1280.jpg",
                     description: "Produces oxygen at night, improving air quality.",
-                    cost: "$15"
+                    cost: 15
                 },
                 {
                     name: "Spider Plant",
                     image: "https://cdn.pixabay.com/photo/2018/07/11/06/47/chlorophytum-3530413_1280.jpg",
                     description: "Filters formaldehyde and xylene from the air.",
-                    cost: "$12"
+                    cost: 12
                 },
                 {
                     name: "Peace Lily",
                     image: "https://cdn.pixabay.com/photo/2019/06/12/14/14/peace-lilies-4269365_1280.jpg",
                     description: "Removes mold spores and purifies the air.",
-                    cost: "$18"
+                    cost: 18
                 },
                 {
                     name: "Boston Fern",
                     image: "https://cdn.pixabay.com/photo/2020/04/30/19/52/boston-fern-5114414_1280.jpg",
                     description: "Adds humidity to the air and removes toxins.",
-                    cost: "$20"
+                    cost: 20
                 },
                 {
                     name: "Rubber Plant",
                     image: "https://cdn.pixabay.com/photo/2020/02/15/11/49/flower-4850729_1280.jpg",
                     description: "Easy to care for and effective at removing toxins.",
-                    cost: "$17"
+                    cost: 17
                 },
                 {
                     name: "Aloe Vera",
                     image: "https://cdn.pixabay.com/photo/2018/04/02/07/42/leaf-3283175_1280.jpg",
                     description: "Purifies the air and has healing properties for skin.",
-                    cost: "$14"
+                    cost: 14
                 }
             ]
         },
@@ -251,7 +258,26 @@ function ProductList({ onHomeClick }) {
     const handleContinueShopping = (e) => {
         e.preventDefault();
         setShowCart(false);
+        // updateAddedToCart();
     };
+
+    const handleAddToCart = (plan) => {
+        dispatch(addItem(plan));
+
+        // setAddedToCart((prevState) => ({
+        //     ...prevState,
+        //     [plan.name]: true
+        // }))
+    };
+
+    // const updateAddedToCart = () => {
+    //     const obj = {};
+    //     cartItems.forEach(({name}) => {
+    //         obj[name] = true;
+    //     });
+    //     setAddedToCart(obj);
+    // }
+
     return (
         <div>
             <div className="navbar" style={styleObj}>
@@ -274,8 +300,25 @@ function ProductList({ onHomeClick }) {
             </div>
             {!showCart ? (
                 <div className="product-grid">
-
-
+                    {plantsArray.map((plant, index) => {
+                        return (
+                            <div key={index}>
+                                <h3 style={{'text-align': 'center'}}>{plant.category}</h3>
+                                <div className="product-list">
+                                    {plant.plants.map((plantDetail, detailIndex) => {
+                                        const isAddedToCart = cartState[plantDetail.name];
+                                        return (
+                                        <div className="product-card" key={detailIndex}>
+                                            <img src={plantDetail.image} alt={plantDetail.name} className='product-image'/>
+                                            <div className='product-title'>{plantDetail.name}</div>
+                                            <div className='product-description'>{plantDetail.description}</div>
+                                            <div className='product-cost'>${plantDetail.cost}</div>
+                                            <button className="product-button" disabled={isAddedToCart} onClick={() => handleAddToCart(plantDetail)}>{isAddedToCart ? 'Added to cart' : 'Add to cart'}</button>
+                                        </div>
+                                    )})}
+                                </div>
+                            </div>
+                    )})}
                 </div>
             ) : (
                 <CartItem onContinueShopping={handleContinueShopping} />
